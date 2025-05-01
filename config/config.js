@@ -1,0 +1,15 @@
+module.exports = {
+    PORT: 3000,
+	BOT_NUMBER: '628965777777',
+    API_KEY: 'your-api-key-here',
+    WEBHOOK_TIMEOUT: 2000,
+    WEBHOOK_SANITATION: false,
+    SOCKET_TIMEOUT: 3000,
+	SOCKET_ATTEMPTS: 5,
+	SOCKET_PAIRING: false,
+	CORS_ORIGIN: ['http://localhost:3000', 'http://test.local'],
+	CORS_CREDENTIALS: false,
+	SELF_MODE_GLOBAL: true,
+	SELF_MODE_PLUGIN: true,
+	GROUP_GREETING: false,
+};
