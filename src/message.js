@@ -217,25 +217,18 @@ async function incomingMessage(sock, message) {
         await handleAddPlugin(msg, sock, sender, message);
     }
 
-    if (CONFIG.SELF_MODE_GLOBAL) {
-        if (fromMe) {
-            for (const { func, filename } of plugins) {
-                try {
-                    await func(sock, message, msg, sender);
-                } catch (error) {
-                    console.error(`[PLUGIN] ERROR ${filename}:`, error.message);
-                    await sock.sendMessage(sender, { react: { text: EMOJIS.error, key: message.key } });
-                }
-            }
-        }
-    } else {
-        for (const { func, filename } of plugins) {
-            try {
+    for (const { func, filename } of plugins) {
+        try {
+            const pluginConfig = require(path.join(PLUGIN_DIR, filename));
+            const isGlobalModeEnabled = pluginConfig?.SELF ?? CONFIG.SELF_MODE_GLOBAL;
+            if (isGlobalModeEnabled && fromMe) {
                 await func(sock, message, msg, sender);
-            } catch (error) {
-                console.error(`[PLUGIN] ERROR ${filename}:`, error.message);
-                await sock.sendMessage(sender, { react: { text: EMOJIS.error, key: message.key } });
+            } else if (!isGlobalModeEnabled) {
+                await func(sock, message, msg, sender);
             }
+        } catch (error) {
+            console.error(`[PLUGIN] ERROR ${filename}:`, error.message);
+            await sock.sendMessage(sender, { react: { text: EMOJIS.error, key: message.key } });
         }
     }
 }
