@@ -12,4 +12,5 @@ module.exports = {
 	SELF_MODE_GLOBAL: true,
 	SELF_MODE_PLUGIN: true,
 	GROUP_GREETING: false,
+	MESSAGE_LOG_RAW: false,
 };

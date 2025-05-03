@@ -1,6 +1,6 @@
 const express = require('express');
+const fs = require('fs');
 const CONFIG = require('./config/config');
-const loader = require('./config/loader');
 const cors = require('./middlewares/cors');
 const { startSocket } = require('./src/socket');
 const Route = require('./routes/web');
@@ -11,7 +11,6 @@ const port = CONFIG.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-let config = loader.getConfig();
 const sockContainer = { sock: null };
 
 (async () => {
@@ -27,7 +26,3 @@ const sockContainer = { sock: null };
         console.error('[SERVER] Failed to start socket:', error);
     }
 })();
-
-loader.onChange((newConfig) => {
-    config = newConfig;
-});

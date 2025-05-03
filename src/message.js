@@ -199,6 +199,10 @@ async function handleAddPlugin(msg, sock, sender, message) {
 }
 
 async function incomingMessage(sock, message) {
+	if (CONFIG.MESSAGE_LOG_RAW) {
+        console.log(JSON.stringify(message, null, 2));
+    }
+	
     const msg = message.message?.conversation || message.message?.extendedTextMessage?.text;
     const sender = message.key.remoteJid;
     const fromMe = message.key.fromMe;

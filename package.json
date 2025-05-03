@@ -1,6 +1,6 @@
 {
   "name": "fhy-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "WhatsApp bot built with @whiskeysockets/baileys, featuring add-on plugins for extended functionality.",
   "main": "server.js",
   "scripts": {
