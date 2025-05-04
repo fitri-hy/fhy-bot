@@ -228,7 +228,6 @@ async function incomingMessage(sock, message) {
             }
         } catch (error) {
             console.error(`[PLUGIN] ERROR ${filename}:`, error.message);
-            await sock.sendMessage(sender, { react: { text: EMOJIS.error, key: message.key } });
         }
     }
 }
