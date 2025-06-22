@@ -1,38 +1,64 @@
-module.exports = async (sock, message, msg, sender) => {
-    const id = message.key.remoteJid;
-    const participant = message.key.participant || sender;
-    const username = participant.split('@')[0];
+const { Mimetype } = require('@whiskeysockets/baileys');
+const axios = require('axios');
 
-    const isOnlyMessageContextInfo = (
-        message.message &&
-        Object.keys(message.message).length === 1 &&
-        message.message.messageContextInfo
-    );
-
-    if (!msg && isOnlyMessageContextInfo) {
-        try {
-            const metadata = await sock.groupMetadata(id);
-            const admins = metadata.participants.filter(
-                (p) => p.admin === 'admin' || p.admin === 'superadmin'
-            );
-            const adminMentions = admins.map((a) => a.id);
-            const senderMention = `@${username}`;
-            const adminNames = admins.map((a) => '@' + a.id.split('@')[0]).join('\n');
-
-            const replyText =
-                `${senderMention} telah terdeteksi melakukan penandaan grup ini pada statusnya!\n\n` +
-                `${adminNames}`;
-
-            const mentions = [participant, ...adminMentions];
-
-            await sock.sendMessage(id, {
-                text: replyText,
-                mentions: mentions,
-            });
-        } catch (err) {
-            console.error("Gagal memproses metadata:", err.message);
-        }
-    }
+const EMOJIS = {
+    loading: '🕒',
+    success: '✅',
+    error: '❌'
 };
 
-module.exports.SELF = false;
+module.exports = async (sock, message, msg, sender) => {
+	
+	// Text
+	if (msg && msg.toLowerCase() === '.text') {
+		await sock.sendMessage(sender, { react: { text: EMOJIS.loading, key: message.key } });
+		await sock.sendMessage(sender, { text: 'Example of a reply message text' }, { quoted: message });
+		await sock.sendMessage(sender, { react: { text: EMOJIS.success, key: message.key } });
+	}
+		
+	// Image
+	if (msg && msg.toLowerCase() === '.img') {
+		await sock.sendMessage(sender, { react: { text: EMOJIS.loading, key: message.key } });
+		const imageUrl = 'https://static.vecteezy.com/system/resources/thumbnails/052/248/075/small_2x/peacock-feather-wallpaper-hd-wallpaper-photo.jpeg';
+		const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+		const imageBuffer = Buffer.from(response.data, 'binary');
+		await sock.sendMessage(sender, { image: imageBuffer, caption: 'Example of a reply message img' }, { quoted: message });
+		await sock.sendMessage(sender, { react: { text: EMOJIS.success, key: message.key } });
+	}
+		
+	// Audio
+	if (msg && msg.toLowerCase() === '.audio') {
+		await sock.sendMessage(sender, { react: { text: EMOJIS.loading, key: message.key } });
+		const audioUrl = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3';
+		const { data } = await axios.get(audioUrl, { responseType: 'arraybuffer' });
+		await sock.sendMessage(sender, {
+		audio: Buffer.from(data, 'binary'),
+			mimetype: 'audio/mp4',
+			ptt: false
+		}, { quoted: message });
+		await sock.sendMessage(sender, { react: { text: EMOJIS.success, key: message.key } });
+	}
+		
+	// Video
+	if (msg && msg.toLowerCase() === '.video') {
+		await sock.sendMessage(sender, { react: { text: EMOJIS.loading, key: message.key } });
+		const videoUrl = 'https://www.sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4';
+		const { data } = await axios.get(videoUrl, { responseType: 'arraybuffer' });
+		await sock.sendMessage(sender, {
+			video: Buffer.from(data, 'binary'),
+			mimetype: 'video/mp4',
+			caption: 'Example of a reply message video'
+		}, { quoted: message });
+		await sock.sendMessage(sender, { react: { text: EMOJIS.success, key: message.key } });
+	}
+		
+	// Location
+	if (msg && msg.toLowerCase() === '.location') {
+		await sock.sendMessage(sender, { react: { text: EMOJIS.loading, key: message.key } });
+		await sock.sendMessage(sender, {
+			location: { degreesLatitude: -6.1751, degreesLongitude: 106.8650 },
+		}, { quoted: message });
+		await sock.sendMessage(sender, { react: { text: EMOJIS.success, key: message.key } });
+	}
+	
+};
