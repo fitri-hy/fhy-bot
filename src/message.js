@@ -199,15 +199,21 @@ async function handleAddPlugin(msg, sock, sender, message) {
 }
 
 async function incomingMessage(sock, message) {
-	if (CONFIG.MESSAGE_LOG_RAW) {
+    if (CONFIG.MESSAGE_LOG_RAW) {
         console.log(JSON.stringify(message, null, 2));
     }
-	
+
     const msg = message.message?.conversation || message.message?.extendedTextMessage?.text;
     const sender = message.key.remoteJid;
     const fromMe = message.key.fromMe;
 
-    if (!msg) return;
+    const isOnlyMessageContextInfo = (
+        message.message &&
+        Object.keys(message.message).length === 1 &&
+        message.message.messageContextInfo
+    );
+
+    if (!msg && !isOnlyMessageContextInfo) return;
 
     if (CONFIG.SELF_MODE_PLUGIN) {
         if (fromMe) {
@@ -221,9 +227,7 @@ async function incomingMessage(sock, message) {
         try {
             const pluginConfig = require(path.join(PLUGIN_DIR, filename));
             const isGlobalModeEnabled = pluginConfig?.SELF ?? CONFIG.SELF_MODE_GLOBAL;
-            if (isGlobalModeEnabled && fromMe) {
-                await func(sock, message, msg, sender);
-            } else if (!isGlobalModeEnabled) {
+            if ((isGlobalModeEnabled && fromMe) || !isGlobalModeEnabled) {
                 await func(sock, message, msg, sender);
             }
         } catch (error) {
